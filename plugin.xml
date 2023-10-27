@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        id="cordova-plugin-mapbox"
+        version="0.0.4">
+
+  <name>Vietmap</name>
+
+  <description>Vietmap plugin for Cordova 7+ (ANDROID ONLY)</description>
+
+  <author>Daniel Neveux</author>
+
+  <license>MIT</license>
+
+  <keywords>mapbox, mapox native, native maps, map</keywords>
+
+  <repo>https://github.com/dagatsoin/cordova-plugin-mapbox</repo>
+
+  <preference name="ACCESS_TOKEN" />
+
+  <engines>
+    <engine name="cordova" version=">=3.5.0"/>
+    <engine name="cordova-plugman" version=">=4.2.0"/><!-- needed for gradleReference support -->
+  </engines>
+
+  <js-module src="www/cordova-plugin-mapbox.js" name="cordova-plugin-mapbox">
+    <clobbers target="Vietmap" />
+  </js-module>
+
+  <!-- android -->
+  <platform name="android">
+    <config-file target="res/xml/config.xml" parent="/*">
+      <feature name="Vietmap">
+        <param name="android-package" value="com.dagatsoin.plugins.mapbox.CDVMapbox" />
+        <param name="onload" value="true" />
+      </feature>
+    </config-file>
+
+    <config-file target="AndroidManifest.xml" parent="/*">
+        <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+        <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+        <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+        <uses-permission android:name="android.permission.INTERNET" />
+        <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+        <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    </config-file>
+
+    <framework src="src/android/mapbox.gradle" custom="true" type="gradleReference"/>
+    <source-file src="src/android/CDVMapbox.java" target-dir="src/com/dagatsoin/plugins/mapbox"/>
+    <source-file src="src/android/MapLayout.java" target-dir="src/com/dagatsoin/plugins/mapbox"/>
+    <source-file src="src/android/MapController.java" target-dir="src/com/dagatsoin/plugins/mapbox"/>
+    <source-file src="src/android/OfflineController.java" target-dir="src/com/dagatsoin/plugins/mapbox"/>
+    <source-file src="src/android/OfflineControllerPool.java" target-dir="src/com/dagatsoin/plugins/mapbox"/>
+    <source-file src="src/android/PluginLayout.java" target-dir="src/com/dagatsoin/plugins/mapbox"/>
+    <source-file src="src/android/RunnableWithArg.java" target-dir="src/com/dagatsoin/plugins/mapbox"/>
+    <source-file src="src/android/libs/androidsvg-1.2.1.jar" target-dir="libs" framework="true"  />
+
+    <config-file target="res/values/strings.xml" parent="/*">
+      <string name="mapbox_accesstoken">$ACCESS_TOKEN</string>
+    </config-file>
+  </platform>
+</plugin>
