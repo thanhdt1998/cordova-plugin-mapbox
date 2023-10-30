@@ -12,40 +12,21 @@ import android.graphics.Canvas;
 import android.graphics.PointF;
 import android.graphics.drawable.BitmapDrawable;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.util.Base64;
 import android.view.MotionEvent;
 import android.view.animation.BounceInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ScrollView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.caverock.androidsvg.SVG;
 import com.caverock.androidsvg.SVGParseException;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
-import com.mapbox.android.gestures.MoveGestureDetector;
-import com.mapbox.android.gestures.RotateGestureDetector;
-import com.mapbox.android.gestures.StandardScaleGestureDetector;
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.FeatureCollection;
-import com.mapbox.mapboxsdk.camera.CameraPosition;
-import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
-import com.mapbox.mapboxsdk.geometry.LatLng;
-import com.mapbox.mapboxsdk.geometry.LatLngBounds;
-import com.mapbox.mapboxsdk.maps.MapView;
-import com.mapbox.mapboxsdk.maps.MapboxMap;
-import com.mapbox.mapboxsdk.maps.MapboxMapOptions;
-import com.mapbox.mapboxsdk.maps.Style;
-import com.mapbox.mapboxsdk.style.expressions.Expression;
-import com.mapbox.mapboxsdk.style.layers.CircleLayer;
-import com.mapbox.mapboxsdk.style.layers.Layer;
-import com.mapbox.mapboxsdk.style.layers.PropertyFactory;
-import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
-import com.mapbox.mapboxsdk.style.sources.CannotAddSourceException;
-import com.mapbox.mapboxsdk.style.sources.GeoJsonOptions;
-import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -58,15 +39,36 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-class MapController implements MapboxMap.OnMapClickListener {
-    @Nullable private String mSelectableFeaturePropType;
+import vn.vietmap.android.gestures.MoveGestureDetector;
+import vn.vietmap.android.gestures.RotateGestureDetector;
+import vn.vietmap.android.gestures.StandardScaleGestureDetector;
+import vn.vietmap.vietmapsdk.camera.CameraPosition;
+import vn.vietmap.vietmapsdk.camera.CameraUpdateFactory;
+import vn.vietmap.vietmapsdk.geometry.LatLng;
+import vn.vietmap.vietmapsdk.geometry.LatLngBounds;
+import vn.vietmap.vietmapsdk.maps.MapView;
+import vn.vietmap.vietmapsdk.maps.Style;
+import vn.vietmap.vietmapsdk.maps.VietMapGL;
+import vn.vietmap.vietmapsdk.maps.VietMapGLOptions;
+import vn.vietmap.vietmapsdk.style.expressions.Expression;
+import vn.vietmap.vietmapsdk.style.layers.CircleLayer;
+import vn.vietmap.vietmapsdk.style.layers.Layer;
+import vn.vietmap.vietmapsdk.style.layers.PropertyFactory;
+import vn.vietmap.vietmapsdk.style.layers.SymbolLayer;
+import vn.vietmap.vietmapsdk.style.sources.CannotAddSourceException;
+import vn.vietmap.vietmapsdk.style.sources.GeoJsonOptions;
+import vn.vietmap.vietmapsdk.style.sources.GeoJsonSource;
+
+class MapController implements VietMapGL.OnMapClickListener {
+    @Nullable
+    private String mSelectableFeaturePropType;
     @Nullable private String mSelectedFeatureLayerId;
     @Nullable private String mSelectedFeatureSourceId;
     private Style style;
 
     private MapView mMapView;
     private String mStyleUrl;
-    private MapboxMap mMapboxMap;
+    private VietMapGL vietMapGL;
     private Activity mActivity;
     boolean isReady = false;
     Runnable mapReady;
@@ -90,7 +92,7 @@ class MapController implements MapboxMap.OnMapClickListener {
             @Nullable final ScrollView scrollView
     ) {
 
-        MapboxMapOptions initOptions;
+        VietMapGLOptions initOptions;
         try {
             initOptions = createMapboxMapOptions(options);
             mStyleUrl = getStyle(options.getString("style"));
@@ -131,11 +133,11 @@ class MapController implements MapboxMap.OnMapClickListener {
         mMapView.onResume();
 
         mMapView.getMapAsync(mapView -> {
-            mMapboxMap = mapView;
+            vietMapGL = mapView;
             mSelectedFeatureSourceId = selectedFeatureSourceId;
             mSelectedFeatureLayerId = selectedFeatureLayerId;
             mSelectableFeaturePropType= selectableFeaturePropType;
-            mMapboxMap.addOnMapClickListener(MapController.this);
+            vietMapGL.addOnMapClickListener(MapController.this);
 
             mapView.setStyle(new Style.Builder().fromUrl(mStyleUrl), _style -> {
                 style = _style;
@@ -520,14 +522,14 @@ class MapController implements MapboxMap.OnMapClickListener {
     }
 
     public LatLng getCenter() {
-        CameraPosition cameraPosition = mMapboxMap.getCameraPosition();
+        CameraPosition cameraPosition = vietMapGL.getCameraPosition();
         double lat = cameraPosition.target.getLatitude();
         double lng = cameraPosition.target.getLongitude();
         return new LatLng(lat, lng);
     }
 
     public void setCenter(double... coords) {
-        CameraPosition cameraPosition = mMapboxMap.getCameraPosition();
+        CameraPosition cameraPosition = vietMapGL.getCameraPosition();
         double lng = coords.length > 0
                 ? coords[0]
                 : cameraPosition.target != null
@@ -544,7 +546,7 @@ class MapController implements MapboxMap.OnMapClickListener {
                 ? cameraPosition.target.getAltitude()
                 : 1000;
 
-        mMapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(
+        vietMapGL.moveCamera(CameraUpdateFactory.newCameraPosition(
                 new CameraPosition.Builder()
                         .target(new LatLng(lat, lng, alt))
                         .build()
@@ -552,15 +554,15 @@ class MapController implements MapboxMap.OnMapClickListener {
     }
 
     void scrollMap(float x, float y) {
-        mMapboxMap.scrollBy(x, y);
+        vietMapGL.scrollBy(x, y);
     }
 
     double getTilt() {
-        return mMapboxMap.getCameraPosition().tilt;
+        return vietMapGL.getCameraPosition().tilt;
     }
 
     void setTilt(double tilt) {
-        mMapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(
+        vietMapGL.moveCamera(CameraUpdateFactory.newCameraPosition(
                 new CameraPosition.Builder()
                         .tilt(tilt)
                         .build()
@@ -568,12 +570,12 @@ class MapController implements MapboxMap.OnMapClickListener {
     }
 
     void flyTo(JSONObject position) {
-        CameraPosition cameraPosition = mMapboxMap.getCameraPosition();
+        CameraPosition cameraPosition = vietMapGL.getCameraPosition();
 
         try {
             int duration = position.isNull("duration") ? 5000 : position.getInt("duration");
 
-            mMapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(MapController.getCameraPosition(position, cameraPosition)), duration);
+            vietMapGL.animateCamera(CameraUpdateFactory.newCameraPosition(MapController.getCameraPosition(position, cameraPosition)), duration);
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -582,11 +584,11 @@ class MapController implements MapboxMap.OnMapClickListener {
 
     void addMapClickCallback(Runnable callback) {
         if (!isReady) return;
-        mMapboxMap.addOnMapClickListener(new MapClickListener(callback));
+        vietMapGL.addOnMapClickListener(new MapClickListener(callback));
     }
 
     public double getZoom() {
-        return mMapboxMap.getCameraPosition().zoom;
+        return vietMapGL.getCameraPosition().zoom;
     }
 
     public void setZoom(double zoom) {
@@ -594,7 +596,7 @@ class MapController implements MapboxMap.OnMapClickListener {
                 .zoom(zoom)
                 .build();
 
-        mMapboxMap.moveCamera(CameraUpdateFactory
+        vietMapGL.moveCamera(CameraUpdateFactory
                 .newCameraPosition(position));
     }
 
@@ -603,12 +605,12 @@ class MapController implements MapboxMap.OnMapClickListener {
                 .zoom(zoom)
                 .build();
 
-        mMapboxMap.animateCamera(CameraUpdateFactory
+        vietMapGL.animateCamera(CameraUpdateFactory
                 .newCameraPosition(position));
     }
 
     LatLngBounds getBounds() {
-        return mMapboxMap.getProjection().getVisibleRegion().latLngBounds;
+        return vietMapGL.getProjection().getVisibleRegion().latLngBounds;
     }
 
     private static class JSONLatLngBounds {
@@ -627,15 +629,15 @@ class MapController implements MapboxMap.OnMapClickListener {
     }
 
     PointF convertCoordinates(LatLng coords) {
-        return mMapboxMap.getProjection().toScreenLocation(coords);
+        return vietMapGL.getProjection().toScreenLocation(coords);
     }
 
     LatLng convertPoint(PointF point) {
-        return mMapboxMap.getProjection().fromScreenLocation(point);
+        return vietMapGL.getProjection().fromScreenLocation(point);
     }
 
-    private MapboxMapOptions createMapboxMapOptions(JSONObject options) throws JSONException {
-        MapboxMapOptions opts = new MapboxMapOptions();
+    private VietMapGLOptions createMapboxMapOptions(JSONObject options) throws JSONException {
+        VietMapGLOptions opts = new VietMapGLOptions();
         opts.attributionEnabled(options.isNull("hideAttribution") || !options.getBoolean("hideAttribution"));
         opts.logoEnabled(options.isNull("hideLogo") || options.getBoolean("hideLogo"));
         opts.camera(MapController.getCameraPosition(options.isNull("cameraPosition") ? null : options.getJSONObject("cameraPosition"), null));
@@ -650,17 +652,7 @@ class MapController implements MapboxMap.OnMapClickListener {
     }
 
     private static String getStyle(final String requested) {
-        if ("light".equalsIgnoreCase(requested)) {
-            return Style.LIGHT;
-        } else if ("dark".equalsIgnoreCase(requested)) {
-            return Style.DARK;
-        } else if ("satellite".equalsIgnoreCase(requested)) {
-            return Style.SATELLITE;
-        } else if ("streets".equalsIgnoreCase(requested)) {
-            return Style.MAPBOX_STREETS;
-        } else {
-            return requested;
-        }
+        return requested;
     }
 
     private static CameraPosition getCameraPosition(JSONObject position, @Nullable CameraPosition start) throws JSONException {
@@ -688,7 +680,7 @@ class MapController implements MapboxMap.OnMapClickListener {
     }
 
     JSONObject getJSONCameraScreenPosition() throws JSONException {
-        CameraPosition position = mMapboxMap.getCameraPosition();
+        CameraPosition position = vietMapGL.getCameraPosition();
         PointF screenPosition = convertCoordinates(position.target);
         try {
             return new JSONObject()
@@ -704,7 +696,7 @@ class MapController implements MapboxMap.OnMapClickListener {
     }
 
     JSONObject getJSONCameraGeoPosition() throws JSONException {
-        CameraPosition position = mMapboxMap.getCameraPosition();
+        CameraPosition position = vietMapGL.getCameraPosition();
 
         try {
             return new JSONObject()
@@ -814,7 +806,7 @@ class MapController implements MapboxMap.OnMapClickListener {
     }
 
     void addOnMoveListener(RunnableWithArg<MapEventPayload> callback) {
-        mMapboxMap.addOnMoveListener(new MapboxMap.OnMoveListener() {
+        vietMapGL.addOnMoveListener(new VietMapGL.OnMoveListener() {
             @Override
             public void onMoveBegin(@NonNull MoveGestureDetector detector) {
                 try {
@@ -844,7 +836,7 @@ class MapController implements MapboxMap.OnMapClickListener {
         });
     }
     void addOnFlingListener(RunnableWithArg<MapEventPayload> callback) {
-        mMapboxMap.addOnFlingListener(() -> {
+        vietMapGL.addOnFlingListener(() -> {
             try {
                 callback.run(new MapEventPayload(MapEventType.OnFling, getBounds()));
             } catch (JSONException e) {
@@ -853,7 +845,7 @@ class MapController implements MapboxMap.OnMapClickListener {
         });
     }
     void addOnRotateListener(RunnableWithArg<MapEventPayload> callback) {
-        mMapboxMap.addOnRotateListener(new MapboxMap.OnRotateListener() {
+        vietMapGL.addOnRotateListener(new VietMapGL.OnRotateListener() {
             @Override
             public void onRotateBegin(@NonNull RotateGestureDetector detector) {
                 try {
@@ -883,7 +875,7 @@ class MapController implements MapboxMap.OnMapClickListener {
         });
     }
     void addOnScaleListener(RunnableWithArg<MapEventPayload> callback) {
-        mMapboxMap.addOnScaleListener(new MapboxMap.OnScaleListener() {
+        vietMapGL.addOnScaleListener(new VietMapGL.OnScaleListener() {
             @Override
             public void onScaleBegin(@NonNull StandardScaleGestureDetector detector) {
                 try {
@@ -918,7 +910,7 @@ class MapController implements MapboxMap.OnMapClickListener {
         if (style != null && mSelectedFeatureLayerId != null) {
 
             final PointF pixel = convertCoordinates(point);
-            List<Feature> features = mMapboxMap.queryRenderedFeatures(pixel);
+            List<Feature> features = vietMapGL.queryRenderedFeatures(pixel);
             Feature feature = null;
             for (int i = 0; i < features.size(); i++ ) {
                 final JsonObject properties = features.get(i).properties();
@@ -927,7 +919,7 @@ class MapController implements MapboxMap.OnMapClickListener {
                     break;
                 }
             }
-            List<Feature> selectedFeature = mMapboxMap.queryRenderedFeatures(pixel, mSelectedFeatureLayerId);
+            List<Feature> selectedFeature = vietMapGL.queryRenderedFeatures(pixel, mSelectedFeatureLayerId);
 
             if (selectedFeature.size() > 0 && mHasSelectedFeature) {
                 return false;
@@ -1025,7 +1017,7 @@ class MapController implements MapboxMap.OnMapClickListener {
         }
     }
 
-    private class MapClickListener implements MapboxMap.OnMapClickListener {
+    private class MapClickListener implements VietMapGL.OnMapClickListener {
         private final Runnable callback;
 
         MapClickListener(Runnable cb) {
@@ -1034,7 +1026,7 @@ class MapController implements MapboxMap.OnMapClickListener {
 
         @Override
         public boolean onMapClick(@NonNull LatLng point) {
-            List<Feature> features = mMapboxMap.queryRenderedFeatures(convertCoordinates(point));
+            List<Feature> features = vietMapGL.queryRenderedFeatures(convertCoordinates(point));
             Objects.requireNonNull(mSelectedFeatureCollection.features()).clear();
             Objects.requireNonNull(mSelectedFeatureCollection.features()).addAll(features);
             callback.run();

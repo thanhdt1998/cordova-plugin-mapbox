@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import android.support.annotation.Nullable;
 import android.view.View;
 
 import android.app.Activity;
@@ -23,6 +22,8 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
+import androidx.annotation.Nullable;
+
 public class PluginLayout extends FrameLayout  {
     private final View _webView;
     private boolean _isSet = false;
@@ -33,7 +34,8 @@ public class PluginLayout extends FrameLayout  {
     private final FrameLayout _scrollFrameLayout;
     private final View _backgroundView;
     private final TouchableWrapper _touchableWrapper;
-    @Nullable private ViewGroup _viewGroup;
+    @Nullable
+    private ViewGroup _viewGroup;
     private boolean _isScrolling = false;
     private ViewGroup.LayoutParams _orgLayoutParams = null;
     private boolean _isDebug = false;

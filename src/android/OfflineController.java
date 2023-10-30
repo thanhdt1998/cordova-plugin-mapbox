@@ -2,21 +2,23 @@ package com.dagatsoin.plugins.mapbox;
 
 import android.app.Activity;
 import android.content.res.Resources;
-import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.animation.AnimationUtils;
 
-import com.mapbox.mapboxsdk.geometry.LatLngBounds;
-import com.mapbox.mapboxsdk.offline.OfflineManager;
-import com.mapbox.mapboxsdk.offline.OfflineRegion;
-import com.mapbox.mapboxsdk.offline.OfflineRegionError;
-import com.mapbox.mapboxsdk.offline.OfflineRegionStatus;
-import com.mapbox.mapboxsdk.offline.OfflineTilePyramidRegionDefinition;
+
+import androidx.annotation.Nullable;
 
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import vn.vietmap.vietmapsdk.geometry.LatLngBounds;
+import vn.vietmap.vietmapsdk.offline.OfflineManager;
+import vn.vietmap.vietmapsdk.offline.OfflineRegion;
+import vn.vietmap.vietmapsdk.offline.OfflineRegionError;
+import vn.vietmap.vietmapsdk.offline.OfflineRegionStatus;
+import vn.vietmap.vietmapsdk.offline.OfflineTilePyramidRegionDefinition;
 
 class OfflineController {
     private final static String TAG = "MAP_CONTROLLER";
@@ -46,7 +48,7 @@ class OfflineController {
     }
 
     OfflineController(Activity activity, String styleUrl) {
-        mOfflineManager = OfflineManager.getInstance(activity);
+//        mOfflineManager = OfflineManager.getInstance(activity);
         mStyleUrl = styleUrl;
         setOfflineRegionStatesFromDB();
     }
@@ -84,7 +86,7 @@ class OfflineController {
             final byte[] metadata = json.getBytes(JSON_CHARSET);
             // Create the offline region and launch the download
             Throttle throttle = new Throttle(1000)
-;            mOfflineManager.createOfflineRegion(definition, metadata, new OfflineManager.CreateOfflineRegionCallback() {
+                    ;            mOfflineManager.createOfflineRegion(definition, metadata, new OfflineManager.CreateOfflineRegionCallback() {
                 @Override
                 public void onCreate(OfflineRegion offlineRegion) {
                     Log.d(TAG, "Offline region created: " + regionName);
@@ -296,7 +298,7 @@ class OfflineController {
             regionName = jsonObject.getString(JSON_FIELD_REGION_NAME);
         } catch (Exception e) {
             Log.e(TAG, "Failed to decode metadata: " + e.getMessage());
-            regionName = "Region " + offlineRegion.getID();
+            regionName = "Region " + offlineRegion.getId();
         }
         return regionName;
     }

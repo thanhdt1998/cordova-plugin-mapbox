@@ -3,18 +3,19 @@ package com.dagatsoin.plugins.mapbox;
 import android.app.Activity;
 import android.content.res.Resources;
 import android.graphics.PointF;
-import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.ViewTreeObserver;
+
+import androidx.annotation.Nullable;
 
 import com.cocoahero.android.geojson.GeoJSON;
 import com.cocoahero.android.geojson.GeoJSONObject;
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.FeatureCollection;
-import com.mapbox.mapboxsdk.Mapbox;
-import com.mapbox.mapboxsdk.geometry.LatLng;
-import com.mapbox.mapboxsdk.geometry.LatLngBounds;
-import com.mapbox.mapboxsdk.style.expressions.Expression;
+import vn.vietmap.vietmapsdk.Vietmap;
+import vn.vietmap.vietmapsdk.geometry.LatLng;
+import vn.vietmap.vietmapsdk.geometry.LatLngBounds;
+import vn.vietmap.vietmapsdk.style.expressions.Expression;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaArgs;
@@ -81,10 +82,10 @@ public class CDVMapbox extends CordovaPlugin implements ViewTreeObserver.OnScrol
     private static final String DESELECT = "DESELECT";
     private static final String ZOOM_TO = "ZOOM_TO";
 
-    private static final String MAPBOX_ACCESSTOKEN_RESOURCE_KEY = "mapbox_accesstoken";
     private CordovaWebView _webView;
     private Activity activity;
-    @Nullable MapLayout mapLayout;
+    @Nullable
+    MapLayout mapLayout;
 
     PluginLayout pluginLayout;
 
@@ -124,10 +125,8 @@ public class CDVMapbox extends CordovaPlugin implements ViewTreeObserver.OnScrol
         pluginLayout = new PluginLayout(_webView.getView(), activity);
 
         try {
-            int mapboxAccesstokenResourceId = cordova.getActivity().getResources().getIdentifier(MAPBOX_ACCESSTOKEN_RESOURCE_KEY, "string", cordova.getActivity().getPackageName());
-            final String _accessToken = cordova.getActivity().getString(mapboxAccesstokenResourceId);
 
-            activity.runOnUiThread(() -> Mapbox.getInstance(activity, _accessToken));
+            activity.runOnUiThread(() -> Vietmap.getInstance(activity));
         } catch (Resources.NotFoundException e) {
             // we'll deal with this when the _accessToken property is read, but for now let's dump the error:
             e.printStackTrace();
